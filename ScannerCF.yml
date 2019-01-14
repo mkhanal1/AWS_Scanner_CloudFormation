@@ -3,7 +3,7 @@ Description: Template to automatically setup Qualys AWS EC2 AWS for Asset Scanni
 Metadata:
   Author: "Mikesh Khanal"
   Version: "1.0"
-  Updated: "12/27/2018"
+  Updated: "1/11/2018"
   Version Comments: "Adapted from Sham's Template"
 Parameters:
   UserName:
