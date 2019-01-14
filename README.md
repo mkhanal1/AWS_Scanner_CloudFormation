@@ -20,7 +20,7 @@ InstanceType:Qualys Scanner instance size Default: t2.medium
 Subnets: subnet to launch scanner in
 
 
-The script spins off following resources:
+# The script spins off following resources:
 
 1. A Lambda Function:
     The Function will run a Qualys api to create a virtual scanner and return the personalization code. The code is supplied as user input data when launching a Qualys EC2 scanner appliance. It also returns the latest AMI code for the image for the current region.
