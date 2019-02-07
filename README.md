@@ -7,17 +7,17 @@ Use CloudFormation Template to create a Qualys EC2 Scanner using the AMI Qualys 
 
 # Input Parameters: 
 
-UserName: Default: {supply_Qualys_user_name} ...
+* UserName: Default: {supply_Qualys_user_name} ...
 
-Password: Default: {supply_Qualys_user_password}
+* Password: Default: {supply_Qualys_user_password}
 
-BaseUrl: Url of the Qualys Server  Default: https://qualysapi.qg2.apps.qualys.com 
+* BaseUrl: Url of the Qualys Server  Default: https://qualysapi.qg2.apps.qualys.com 
 
-ScannerName: The name you want to give to your scanner appliance
+* ScannerName: The name you want to give to your scanner appliance
 
-InstanceType:Qualys Scanner instance size Default: t2.medium
+* InstanceType:Qualys Scanner instance size Default: t2.medium
 
-Subnets: The subnet in which the scanner will be launched
+* Subnets: The subnet in which the scanner will be launched
 
 
 # The script spins off following resources:
