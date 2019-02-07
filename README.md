@@ -4,9 +4,10 @@ CloudFormation Template to deploy Qualys scanner in your selected subnet
 # License
 """THIS SCRIPT IS PROVIDED TO YOU "AS IS." TO THE EXTENT PERMITTED BY LAW, QUALYS HEREBY DISCLAIMS ALL WARRANTIES AND LIABILITY FOR THE PROVISION OR USE OF THIS SCRIPT. IN NO EVENT SHALL THESE SCRIPTS BE DEEMED TO BE CLOUD SERVICES AS PROVIDED BY QUALYS"""
 
+# Usage:
 Use CloudFormation Template to create a Qualys EC2 Scanner using the AMI Qualys Virtual Scanner Appliance (Pre-Authorized Scanning) hardware virtual machine (HVM) and associated Security Group. To run the script you will need to supply credentials for the Qualys user name and password for Qualys API Access.
 
-# Input Parameters: 
+## Input Parameters: 
 
 * UserName: Default: {supply_Qualys_user_name} ...
 
@@ -21,7 +22,7 @@ Use CloudFormation Template to create a Qualys EC2 Scanner using the AMI Qualys 
 * Subnets: The subnet in which the scanner will be launched
 
 
-# The script spins off following resources:
+## The script spins off following resources:
 
 1. A Lambda Function:
     The Lambda function will run a Qualys API to create a virtual scanner and return the personalization code. The code is supplied as user input data when launching a Qualys EC2 scanner appliance. It also returns the latest AMI code for the image of the current region.
