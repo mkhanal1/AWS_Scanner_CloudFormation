@@ -36,4 +36,4 @@ Use CloudFormation Template to create a Qualys EC2 Scanner using the AMI Qualys 
 ## Note
 The CloudFormation template finds the AMI Id using `ec2 describe-images --filters "Name=name,Values=*1b8af947-aa54-4852-9da6-282428ba2f46*" ` and then does a quick sort to find the latest AMI ID based on the creation date.
 
-You can filter based on `product-code`. Product code for Qualys Scanner is 1mp9h4zd2ze4biqif5schqeyu
+You can also filter AMIs based on `product-code`. Product code for Qualys Scanner is 1mp9h4zd2ze4biqif5schqeyu
