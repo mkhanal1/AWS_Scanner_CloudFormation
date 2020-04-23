@@ -60,10 +60,12 @@ Resources:
         ZipFile: !Sub |
           def lambda_handler(event, context):
             import boto3
+            import base64
+            import logging.config
             import xml.etree.ElementTree as ET
             import cfnresponse
-            import os
-            import sys
+            import os,sys
+            import botocore.vendored.requests as requests
             region = context.invoked_function_arn.split(":")[3]
             accountId = context.invoked_function_arn.split(":")[4]
             SCANNERNAME = os.getenv('SCANNERNAME')
@@ -73,26 +75,52 @@ Resources:
             ec2 = boto3.client('ec2')
             filters = [{'Name': 'name', 'Values': ['*1b8af947-aa54-4852-9da6-282428ba2f46*']}]
             images = ec2.describe_images(Filters=filters) 
-            a = images['Images']
-            c = images['Images'][0]['CreationDate']
-            for i in range (len(a)-1):
-                j = 0
-                if c < images['Images'][i]['CreationDate']:
-                    c= images['Images'][i]['CreationDate']
-                    j = i
-            AMIID = images['Images'][j]['ImageId']
-            qurl = 'curl -u {}:{} -H "X-Requested-With:Curl" -X "POST" -d "action=create&echo_request=1&name={}" "{}/api/2.0/fo/appliance/"'.format(username, password,SCANNERNAME,BASEURL)
-            result = os.popen(qurl).read()
-            tree = ET.fromstring(result)
-            PERS = tree.find('RESPONSE/APPLIANCE/ACTIVATION_CODE').text
-            responseData = {}
-            responseData['PERS'] = PERS
-            responseData['AMIID'] = AMIID
+            imagelist = images['Images']
+            print ("The number of images for scanner is {}".format(len(imagelist)))
+            AMIID = imagelist[0]['ImageId']
+            if (len(imagelist)>0):
+                imagecreationdate = images['Images'][0]['CreationDate']
+                for i in range (len(imagelist)-1):
+                    j = 0
+                    if imagecreationdate < images['Images'][i]['CreationDate']:
+                        imagecreationdate = images['Images'][i]['CreationDate']
+                        j = i
+                AMIID = images['Images'][j]['ImageId']
+            print ("ImageId = {}".format(AMIID))
+            usrPass = str(username)+':'+str(password)
+            b64Val = base64.b64encode(str(usrPass).encode('ascii'))
+            headers = {
+            'X-Requested-With' : 'python requests',
+            'Authorization': "Basic %s" % b64Val,
+            'Content': 'text/xml'
+            }
+            try:
+                rURL = BASEURL + "/api/2.0/fo/appliance/"
+                params = {"action":"create","name":SCANNERNAME}
+                print ("URl =  {}".format(rURL))
+                print ("Body =  {}".format(params))
+                print("Headers = {}".format(headers))            
+                qurl = requests.post(rURL,  params=params, headers=headers)
+                print ("The status code = {}".format(qurl.status_code))
+                #qurl = 'curl -v -u {}:{} -H "X-Requested-With:Curl" -X "POST" -d "action=create&echo_request=1&name={}" "{}/api/2.0/fo/appliance/"'.format(username, password,SCANNERNAME,BASEURL)
+                #result = os.popen(qurl).read()
+                print ("XML = {}".format((qurl.text)))
+                tree = ET.fromstring(qurl.text)
+                if (tree.find('RESPONSE/CODE') is None):             
+                    PERS = tree.find('RESPONSE/APPLIANCE/ACTIVATION_CODE').text
+                    responseData = {}
+                    responseData['PERS'] = PERS
+                    responseData['AMIID'] = AMIID
+                else:
+                    print("The Error code {}:{}".format(tree.find('RESPONSE/CODE').text,tree.find('RESPONSE/TEXT').text))
+                    exit(0)
+            except IOError as e:
+                print ("Status with error {1}: {2}".format(e.errno, e.strerror))
             cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
       Description: Lambda Function to create a Qualys Virtual Scanner in QCP
       Handler: index.lambda_handler
       Role: !GetAtt 'LambdaExecutionRole.Arn'
-      Runtime: python2.7
+      Runtime: python3.6
       Timeout: '120'
   LambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -133,22 +161,10 @@ Resources:
      ImageId: !GetAtt 'CustomResource.AMIID'
      SubnetId: !Ref Subnets
      InstanceType: !Ref InstanceType
-     SecurityGroupIds:
-      - !GetAtt QualysSG.GroupId
      UserData:
       Fn::Base64: !Sub |
        PERSCODE=${CustomResource.PERS}
-
-  QualysSG:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: allow connections from specified CIDR ranges
-      SecurityGroupIngress:
-      - CidrIp: 0.0.0.0/0
-        FromPort: 22
-        IpProtocol: tcp
-        ToPort: 22
-        
+       
   CustomResource:
     Type: Custom::CustomResource
     Properties:
